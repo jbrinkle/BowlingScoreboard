@@ -7,20 +7,17 @@ namespace Bowling
 {
     class Program
     {
+        private const ConsoleColor TitleColor = ConsoleColor.Cyan;
+        private const ConsoleColor ErrorColor = ConsoleColor.Red;
+        private const ConsoleColor QuestionColor = ConsoleColor.White;
+        private const ConsoleColor InfoColor = ConsoleColor.Yellow;
+
         private IGame game;
         private ScoreboardViewer viewer;
 
         static void Main(string[] args)
         {
             var bowlingGame = new Program();
-
-            //var rightEdge = Console.WindowWidth;
-            //var topEdge = Console.WindowTop;
-            //var text = $"{rightEdge},{topEdge}";
-            //Console.CursorTop = topEdge;
-            //Console.CursorLeft = rightEdge - text.Length;
-            //Console.BackgroundColor = ConsoleColor.DarkGray;
-            //Console.ForegroundColor = ConsoleColor.Yellow;
 
             bowlingGame.Startup();
 
@@ -37,10 +34,10 @@ namespace Bowling
         {
             Console.Clear();
 
-            Console.WriteLine("Bowling Scoresheet (v1.0)");
-            Console.WriteLine("By Jason Brinkle");
-            Console.WriteLine("Copyright (c) 2018");
-            Console.WriteLine();
+            ScoreboardViewer.WriteText("Bowling Scoresheet (v1.0)", true, TitleColor);
+            ScoreboardViewer.WriteText("By Jason Brinkle", true, TitleColor);
+            ScoreboardViewer.WriteText("Copyright (c) 2018", true, TitleColor);
+            ScoreboardViewer.WriteText(null, true);
 
             var error = true;
             var playerCount = 0;
@@ -48,36 +45,36 @@ namespace Bowling
             while (error)
             {
                 error = false;
-                Console.Write("How many players this time? ");
+                ScoreboardViewer.WriteText("How many players this time? ", false, QuestionColor);
                 var playerCountAnswer = Console.ReadLine();
 
                 if (!int.TryParse(playerCountAnswer, out playerCount))
                 {
-                    Console.WriteLine("Come on, dude. Seriously.");
+                    ScoreboardViewer.WriteText("Come on, dude. Seriously.", true, ErrorColor);
                     error = true;
                 }
 
                 if (playerCount <= 0)
                 {
-                    Console.WriteLine("So... you didn't want to play?");
+                    ScoreboardViewer.WriteText("So... you didn't want to play?", true, ErrorColor);
                     error = true;
                 }
 
                 if (playerCount > 6)
                 {
-                    Console.WriteLine("To save you from a really looong game, I'm going to ignore that response. Try playing with 6 or less players.");
+                    ScoreboardViewer.WriteText("To save you from a really looong game, I'm going to ignore that response. Try playing with 6 or less players.", true, ErrorColor);
                     error = true;
                 }
             }
 
-            Console.WriteLine();
-            Console.WriteLine("Great! Let's get some names...");
-            Console.WriteLine();
+            ScoreboardViewer.WriteText(null, true);
+            ScoreboardViewer.WriteText("Great! Let's get some names...", true);
+            ScoreboardViewer.WriteText(null, true);
 
             int playerNum = 1;
             while (playerNum <= playerCount)
             {
-                Console.Write($"What is player #{playerNum}'s name? ");
+                ScoreboardViewer.WriteText($"What is player #{playerNum}'s name? ", false, QuestionColor);
                 var name = Console.ReadLine();
 
                 if (name.Length > 10) name = name.Substring(0, 10);
@@ -109,14 +106,18 @@ namespace Bowling
 
         private void GetRolls(IPlayer player, int frame)
         {
-            Console.WriteLine();
-            Console.WriteLine($"PLAYER {player.Name} FRAME {frame + 1}");
+            ScoreboardViewer.WriteText(null, true);
+            ScoreboardViewer.WriteText("PLAYER ", false);
+            ScoreboardViewer.WriteText(player.Name, false, InfoColor);
+            ScoreboardViewer.WriteText(" -- FRAME ", false);
+            ScoreboardViewer.WriteText($"{ frame + 1}", true, InfoColor);
+            ScoreboardViewer.WriteText(null, true);
 
             var done = false;
             var roll = 1;
             while (!done)
             {
-                Console.WriteLine($"Roll #{roll}: ");
+                ScoreboardViewer.WriteText($"Roll #{roll}: ", false, QuestionColor);
                 var input = Console.ReadLine();
 
                 if (string.IsNullOrWhiteSpace(input)) continue;
@@ -128,7 +129,7 @@ namespace Bowling
                 }
                 catch (BowlingScoreException ex)
                 {
-                    Console.WriteLine(ex.Message);
+                    ScoreboardViewer.WriteText(ex.Message, true, ErrorColor);
                 }
             }
         }

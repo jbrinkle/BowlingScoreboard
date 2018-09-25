@@ -9,16 +9,29 @@ namespace Bowling
     internal class ScoreboardViewer
     {
         // │─┌┐└┘├┤┬┴┼═║╒╓╔╕╖╗╘╙╚╛╜╝╞╟╠╡╢╣╤╥╦╧╨╩╪╫╬
-
+        private ConsoleColor originalBgColor;
         private IGame game;
 
         private const int SpaceForName = 12;
         private const int SpaceForRegularFrame = 5;
         private const int SpaceForTenthFrame = 7;
 
+        public const ConsoleColor TableColor = ConsoleColor.Gray;
+        public const ConsoleColor HeaderColor = ConsoleColor.White;
+        public const ConsoleColor NameColor = ConsoleColor.Yellow;
+        public const ConsoleColor RollColor = ConsoleColor.White;
+        public const ConsoleColor ScoreColor = ConsoleColor.Cyan;
+
         public ScoreboardViewer(IGame g)
         {
             game = g;
+            originalBgColor = Console.BackgroundColor;
+            Console.BackgroundColor = ConsoleColor.Black;
+        }
+
+        ~ScoreboardViewer()
+        {
+            Console.BackgroundColor = originalBgColor;
         }
 
         public void PrintScoreBoard()
@@ -44,21 +57,23 @@ namespace Bowling
             var lineOverTenFrame = MultiplyString("═", SpaceForTenthFrame);
 
             // top bar
-            Console.WriteLine($"╔{lineOverName}{MultiplyString($"╤{lineOverRegFrame}", 9)}╤{lineOverTenFrame}╗");
+            WriteText($"╔{lineOverName}{MultiplyString($"╤{lineOverRegFrame}", 9)}╤{lineOverTenFrame}╗", true, TableColor);
 
             // header line
+            WriteText("║", false, TableColor);
             var nameHeader = string.Format($" {{0,{SpaceForName - 2}}} ", "Name");
-            Console.Write("║" + nameHeader);
+            WriteText(nameHeader, false, HeaderColor);
+
             for (var i = 1; i <= 10; i++)
             {
-                Console.Write("│");
+                WriteText("│", false, TableColor);
                 var pattern = $" {{0,{(i == 10 ? (-SpaceForTenthFrame + 2) : (-SpaceForRegularFrame + 2))}}} ";
-                Console.Write(pattern, i);
+                WriteText(string.Format(pattern, i), false, HeaderColor);
             }
-            Console.WriteLine("║");
+            WriteText("║", true, TableColor);
             
             // bottom of header
-            Console.WriteLine($"╠{lineOverName}{MultiplyString($"╪{lineOverRegFrame}", 9)}╪{lineOverTenFrame}╣");
+            WriteText($"╠{lineOverName}{MultiplyString($"╪{lineOverRegFrame}", 9)}╪{lineOverTenFrame}╣", true, TableColor);
         }
 
         private void WriteFooter()
@@ -67,7 +82,7 @@ namespace Bowling
             var lineOverRegFrame = MultiplyString("═", SpaceForRegularFrame);
             var lineOverTenFrame = MultiplyString("═", SpaceForTenthFrame);
 
-            Console.WriteLine($"╚{lineOverName}{MultiplyString($"╧{lineOverRegFrame}", 9)}╧{lineOverTenFrame}╝");
+            WriteText($"╚{lineOverName}{MultiplyString($"╧{lineOverRegFrame}", 9)}╧{lineOverTenFrame}╝", true, TableColor);
         }
 
         private void WritePlayer(IPlayer player)
@@ -77,29 +92,37 @@ namespace Bowling
             var lineOverTenFrame = MultiplyString("═", SpaceForTenthFrame);
 
             // line 1
-            Console.Write($"║ {player.Name,(SpaceForName - 2)} ");
+            WriteText("║", false, TableColor);
+            WriteText($" {player.Name,(SpaceForName - 2)} ", false, NameColor);
             foreach (var f in player.Frames)
             {
                 if (f != player.Frames.Last())
                 {
-                    Console.Write($"│ {f.ToString(),(-SpaceForRegularFrame + 2)} ");
+                    WriteText("│", false, TableColor);
+                    WriteText($" { f.ToString(),(-SpaceForRegularFrame + 2)} ", false, RollColor);
                 }
                 else
                 {
-                    Console.WriteLine($"│ {f.ToString(),(-SpaceForTenthFrame + 2)} ║");
+                    WriteText("│", false, TableColor);
+                    WriteText($" { f.ToString(),(-SpaceForTenthFrame + 2)} ", false, RollColor);
+                    WriteText("║", true, TableColor);
                 }
             }
             // line 2
-            Console.Write($"║ {" ",(SpaceForName - 2)} ");
+            WriteText("║", false, TableColor);
+            WriteText($" { " ",(SpaceForName - 2)} ", false);
             foreach (var f in player.Frames)
             {
                 if (f != player.Frames.Last())
                 {
-                    Console.Write($"│ {f.Score,(-SpaceForRegularFrame + 2)} ");
+                    WriteText("│", false, TableColor);
+                    WriteText($" { f.Score,(-SpaceForRegularFrame + 2)} ", false, ScoreColor);
                 }
                 else
                 {
-                    Console.WriteLine($"│ {f.Score,(-SpaceForTenthFrame + 2)} ║");
+                    WriteText("│", false, TableColor);
+                    WriteText($" {f.Score,(-SpaceForTenthFrame + 2)} ", false, ScoreColor);
+                    WriteText("║", true, TableColor);
                 }
             }
         }
@@ -110,7 +133,7 @@ namespace Bowling
             var lineOverRegFrame = MultiplyString("─", SpaceForRegularFrame);
             var lineOverTenFrame = MultiplyString("─", SpaceForTenthFrame);
 
-            Console.WriteLine($"╟{lineOverName}{MultiplyString($"┼{lineOverRegFrame}", 9)}┼{lineOverTenFrame}╢");
+            WriteText($"╟{lineOverName}{MultiplyString($"┼{lineOverRegFrame}", 9)}┼{lineOverTenFrame}╢", true, TableColor);
         }
 
         private string MultiplyString(string s, int count)
@@ -121,6 +144,17 @@ namespace Bowling
                 output.Append(s);
 
             return output.ToString();
+        }
+
+        public static void WriteText(string text, bool newline, ConsoleColor color = ConsoleColor.Black)
+        {
+            var originalColor = Console.ForegroundColor;
+            Console.ForegroundColor = color == ConsoleColor.Black ? originalColor : color;
+
+            Console.Write(text);
+            if (newline) Console.WriteLine();
+
+            Console.ForegroundColor = originalColor;
         }
     }
 }
