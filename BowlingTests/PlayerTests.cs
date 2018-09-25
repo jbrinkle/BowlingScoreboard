@@ -80,6 +80,22 @@ namespace BowlingTests
         }
 
         [Test]
+        public void Player_GutterBallsAddZeroToScore_Works()
+        {
+            // arrange
+            var subject = new Player("Bob");
+
+            // act
+            subject.RecordRoll(0, '4');
+            subject.RecordRoll(0, '2').Should().BeTrue();
+            subject.RecordRoll(1, '-');
+            subject.RecordRoll(1, '-');
+
+            // assert
+            subject.Score.Should().Be(6);
+        }
+
+        [Test]
         [TestCase('4', '/', '1', '-', 11)]
         [TestCase('X', null, '3', '3', 16)]
         public void Player_AutoUpdateScoreForNinthFrame_Works(char frame9roll1, char? frame9roll2, char frame10roll1, char frame10roll2, int expectedScore)

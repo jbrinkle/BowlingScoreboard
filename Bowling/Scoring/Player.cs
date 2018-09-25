@@ -69,13 +69,18 @@ namespace Bowling.Scoring
 
             if (frame.IsComplete)
             {
-                if (framesNeedingScoreUpdates.ContainsKey(frameIndex))
+                var scoreUpdateTriggerIndex = frameIndex;
+                if (framesNeedingScoreUpdates.ContainsKey(scoreUpdateTriggerIndex))
                 {
-                    foreach (var otherFrameIndex in framesNeedingScoreUpdates[frameIndex])
+                    foreach (var indexOfFrameNeedingScore in framesNeedingScoreUpdates[scoreUpdateTriggerIndex])
                     {
-                        UpdateScoreByFrameIndex(otherFrameIndex);
-                        Score = frames[otherFrameIndex].Score ?? Score;
+                        UpdateScoreByFrameIndex(indexOfFrameNeedingScore);
+                        Score = frames[indexOfFrameNeedingScore].Score ?? Score;
                     }
+                }
+                else if (frameIndex > 0)
+                {
+                    Score = frames[frameIndex - 1].Score ?? 0;
                 }
 
                 if (frameIndex == 9)
