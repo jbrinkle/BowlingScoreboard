@@ -14,20 +14,17 @@ namespace Bowling.Scoring
         private const char MarkZero = '0';
         private const char MarkNine = '9';
 
-        private Roll(char mark)
-        {
-            Mark = mark;
-        }
+        public char Mark { get; private set; }
 
-        public char Mark { get; }
+        public bool IsSet => Mark != '\0';
 
-        public bool IsSpare => Mark == '/';
+        public bool IsSpare => Mark == MarkSpare;
 
-        public bool IsStrike => Mark == 'X';
+        public bool IsStrike => Mark == MarkUpperStrike;
 
-        public bool IsGutter => Mark == '-';
+        public bool IsGutter => Mark == MarkGutter;
 
-        public bool IsNotStrikeNorSpare => !IsSpare && !IsStrike;
+        public bool IsNotStrikeNorSpare => !IsSpare && !IsStrike && IsSet;
 
         public int Value
         {
@@ -40,17 +37,16 @@ namespace Bowling.Scoring
 
         public override string ToString()
         {
-            return Mark.ToString();
+            return IsSet ? Mark.ToString() : null;
         }
 
-        public static Roll Create(char mark)
+        public void SetMark(char mark)
         {
             if (!IsValidMark(mark)) throw new ArgumentException("Invalid bowling mark.");
 
-            if (mark == MarkZero) return new Roll(MarkGutter);
-            if (mark == MarkLowerStrike) return new Roll(MarkUpperStrike);
-
-            return new Roll(mark);
+            if (mark == MarkZero) Mark = MarkGutter;
+            else if (mark == MarkLowerStrike) Mark = MarkUpperStrike;
+            else Mark = mark;
         }
 
         public static bool IsValidMark(char mark)
